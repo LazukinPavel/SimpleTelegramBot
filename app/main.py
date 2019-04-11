@@ -21,9 +21,12 @@ def get_search_result_stat(word):
     r = requests.get(url)
 
     soup = BeautifulSoup(r.text, 'html.parser')
-    data = soup.find('div', {'id': 'resultStats'}).contents[0]
-    data = data.split(' ')[-2]
-    result = (data.encode('ascii', 'ignore')).decode('utf-8')
+    try:
+        data = soup.find('div', {'id': 'resultStats'}).contents[0]
+        data = data.split(' ')[-2]
+        result = (data.encode('ascii', 'ignore')).decode('utf-8')
+    except IndexError:
+        result = 0
 
     return result
 
@@ -44,7 +47,10 @@ def index():
 
         result = get_search_result_stat(text)
 
-        reply = f'{result} results in Google for word \"{text}\" '
+        if result:
+            reply = f'{result} results in Google for \"{text}\" '
+        else:
+            reply = f'No results found for \"{text}\"'
         send_message(chat_id, text=reply)
 
         return jsonify(r)
